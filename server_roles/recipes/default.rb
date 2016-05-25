@@ -10,21 +10,29 @@
 Chef::Log.info("f-world21:opsworks-cookbooks/server_roles is going!")
 Chef::Log.info("inspect node[:deploy] object")
 Chef::Log.info(node[:deploy])
-node[:deploy].each do |application, deploy_value|
-  Chef::Log.info(application)
-  Chef::Log.info(deploy_value)
 
+node[:deploy].each do |application, deploy_value|
   Chef::Log.info("create #{deploy_value[:deploy_to]}/shared/config dir if not exist")
   directory "#{deploy_value[:deploy_to]}/shared/config" do
-    owner "deploy"
-    group "www-data"
+    group deploy_value[:group]
+    owner deploy_value[:user]
     mode 0774
     recursive true
     action :create
   end
 
-  Chef::Log.info("create app_data.yml")
-  file File.join(deploy_value[:deploy_to], 'shared', 'config', 'app_data.yml') do
-    content YAML.dump(deploy_value[:server_roles].to_hash)
+  template "#{deploy_value[:deploy_to]}/shared/config/server_roles.yml" do
+    source "server_roles.yml.erb"
+    cookbook 'server_roles'
+    mode "0660"
+    group deploy_value[:group]
+    owner deploy_value[:user]
+    variables(:server_roles => deploy_value[:server_roles], :environment => deploy_value[:rails_env])
+
+    #notifies :run, "execute[restart Rails app #{application}]"
+
+    only_if do
+      deploy_value[:database][:host].present? && File.directory?("#{deploy_value[:deploy_to]}/shared/config/")
+    end
   end
 end

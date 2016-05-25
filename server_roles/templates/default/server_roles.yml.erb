@@ -1,0 +1,6 @@
+<% (['development', 'production'] + [@environment]).uniq.each do |env| -%>
+<%= env %>:
+  admin_app_server: <%= @server_roles[:enable_admin_app_server] ? 'true' : 'false' %>
+  index_getters: <%= @server_roles[:enable_index_getters]?  'true' : 'false' %>
+  medium_getters: <%= @server_roles[:enable_medium_getters]?  'true' : 'false' %>
+<% end %>
