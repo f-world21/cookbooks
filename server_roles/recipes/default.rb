@@ -8,6 +8,8 @@
 #
 
 Chef::Log.info("f-world21:opsworks-cookbooks/server_roles is going!")
+Chef::Log.info("inspect node[:deploy] object")
+Chef::Log.info(node[:deploy])
 node[:deploy].each do |application, deploy|
   Chef::Log.info(application)
   Chef::Log.info(deploy)
